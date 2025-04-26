@@ -54,5 +54,35 @@ def api_insert_document(data: DataModel):
 def read_root():
     return {"message": "Hello from DSLA FastAPI backend!"}
 
+import os
+from pymongo import MongoClient
+from fastapi import FastAPI
+from pydantic import BaseModel
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+app = FastAPI()
+
+# MongoDB connection string and database name from environment variables
+MONGO_URI = os.getenv("mongodb+srv://misran:dsip@clusterdsip.hkfipy7.mongodb.net/?retryWrites=true&w=majority&appName=ClusterDSIP")
+DB_NAME = os.getenv("docsDB")
+COLLECTION_NAME = os.getenv("documents")
+
+# Establish MongoDB connection
+client = MongoClient(MONGO_URI)
+db = client[DB_NAME]
+collection = db[COLLECTION_NAME]
+
+# Define a simple model for input data
+class InputData(BaseModel):
+    input_data: str
+
+@app.post("/process-data")
+def process(input_data: InputData):
+    # Example MongoDB interaction: Insert data into collection
+    collection.insert_one({"input_data": input_data.input_data})
+    return {"result": f"Data inserted: {input_data.input_data}"}
 
 
