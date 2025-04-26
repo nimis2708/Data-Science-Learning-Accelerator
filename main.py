@@ -77,3 +77,10 @@ def api_process_data(input_data: InputData):
         return {"result": f"Data inserted with ID: {inserted_id}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+from db_utils import test_mongo_connection
+
+@app.on_event("startup")
+async def startup_event():
+    test_mongo_connection()
+
