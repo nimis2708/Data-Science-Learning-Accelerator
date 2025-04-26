@@ -1,13 +1,18 @@
 # db_utils.py
+import os
 from pymongo import MongoClient
 import pandas as pd
 
 # MongoDB setup
-client = MongoClient("mongodb+srv://misran:dsip@clusterdsip.hkfipy7.mongodb.net/?retryWrites=true&w=majority&appName=ClusterDSIP")  # <<=== Replace this with your real connection string
-db = client["docsDB"]
+MONGO_URI = os.getenv("MONGO_URI")
+DB_NAME = os.getenv("DB_NAME")
+
+if not MONGO_URI or not DB_NAME:
+    raise Exception("MONGO_URI or DB_NAME environment variable not set!")
+
+client = MongoClient(MONGO_URI)
+db = client[DB_NAME]
 collection = db["documents"]
-
-
 
 def fetch_existing_filenames():
     """
@@ -42,12 +47,7 @@ def insert_new_records(new_data):
     else:
         return {"inserted_count": 0}
 
-from pymongo import MongoClient
-
 def get_db_collection():
-    client = MongoClient("mongodb+srv://misran:dsip@clusterdsip.hkfipy7.mongodb.net/?retryWrites=true&w=majority&appName=ClusterDSIP")
-    db = client["docsDB"]
-    collection = db["documents"]
     return collection
 
 def check_duplicate(data):
@@ -59,4 +59,3 @@ def insert_document(data):
     collection = get_db_collection()
     result = collection.insert_one(data)
     return str(result.inserted_id)
-
