@@ -3,7 +3,7 @@ from pymongo import MongoClient
 import pandas as pd
 
 # MongoDB setup
-client = MongoClient("mongodb+srv://misran:<db_password>@clusterdsip.hkfipy7.mongodb.net/?retryWrites=true&w=majority&appName=ClusterDSIP")  # <<=== Replace this with your real connection string
+client = MongoClient("mongodb+srv://misran:dsip@clusterdsip.hkfipy7.mongodb.net/?retryWrites=true&w=majority&appName=ClusterDSIP")  # <<=== Replace this with your real connection string
 db = client["docsDB"]
 collection = db["documents"]
 
@@ -45,7 +45,7 @@ def insert_new_records(new_data):
 from pymongo import MongoClient
 
 def get_db_collection():
-    client = MongoClient("mongodb+srv://misran:<db_password>@clusterdsip.hkfipy7.mongodb.net/?retryWrites=true&w=majority&appName=ClusterDSIP")
+    client = MongoClient("mongodb+srv://misran:dsip@clusterdsip.hkfipy7.mongodb.net/?retryWrites=true&w=majority&appName=ClusterDSIP")
     db = client["docsDB"]
     collection = db["documents"]
     return collection
