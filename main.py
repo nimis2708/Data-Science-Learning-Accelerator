@@ -11,6 +11,19 @@ from db_utils import (
 
 app = FastAPI()
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+# Enable CORS for your frontend URL
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://kzmgt0nvxi2tnz4iu7g6.lite.vusercontent.net"],  # Your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
+
 # --------------------------
 # Models
 # --------------------------
