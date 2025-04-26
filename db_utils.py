@@ -77,4 +77,16 @@ def insert_document(data):
     result = collection.insert_one(data)
     return str(result.inserted_id)
 
+def test_mongo_connection():
+    try:
+        # Try fetching a document or pinging the server
+        result = collection.find_one()
+        if result:
+            print("MongoDB connection successful. Found a document.")
+        else:
+            print("MongoDB connection successful, but no documents found.")
+    except Exception as e:
+        print(f"Error connecting to MongoDB: {e}")
+
+
 
