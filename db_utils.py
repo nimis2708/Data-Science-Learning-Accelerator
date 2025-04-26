@@ -1,32 +1,27 @@
 # db_utils.py
-import os
 from pymongo import MongoClient
 import pandas as pd
+import os
 
 # MongoDB connection setup
-MONGO_URI = os.getenv("MONGO_URI")
-DB_NAME = os.getenv("DB_NAME")
-COLLECTION_NAME = os.getenv("COLLECTION_NAME")
+MONGO_URI = "mongodb+srv://misran:dsip@clusterdsip.hkfipy7.mongodb.net/?retryWrites=true&w=majority&appName=ClusterDSIP"
+DB_NAME = "docsDB"
+COLLECTION_NAME = "documents"
 
-def get_db_collection():
-    """
-    Connect to MongoDB and return the collection.
-    """
-    if not MONGO_URI or not DB_NAME or not COLLECTION_NAME:
-        raise ValueError("Missing MongoDB environment variables.")
+client = MongoClient(MONGO_URI)
+db = client[DB_NAME]
+collection = db[COLLECTION_NAME]
 
-    client = MongoClient(MONGO_URI)
-    db = client[DB_NAME]
-    collection = db[COLLECTION_NAME]
-    return collection
+# -----------------------------------
+# Helper Functions
+# -----------------------------------
 
 def fetch_existing_filenames():
     """
     Fetch existing filenames from MongoDB collection.
     """
-    collection = get_db_collection()
     existing_docs = collection.find({}, {"filename": 1, "_id": 0})
-    existing_filenames = [doc.get("filename") for doc in existing_docs]
+    existing_filenames = [doc.get("filename") for doc in existing_docs if doc.get("filename")]
     return existing_filenames
 
 def check_for_duplicates(new_data):
@@ -36,18 +31,31 @@ def check_for_duplicates(new_data):
     existing_filenames = fetch_existing_filenames()
     new_df = pd.DataFrame(new_data)
 
-    new_df['Duplicate Status'] = new_df['filename'].apply(
-        lambda x: 'Duplicate' if x in existing_filenames else 'New'
-    )
+    if "GitHub Repo Name" in new_df.columns:
+        # For GitHub Repo Name-based duplication checking
+        new_df['Duplicate Status'] = new_df['GitHub Repo Name'].apply(
+            lambda x: 'Duplicate' if x in existing_filenames else 'New'
+        )
+    elif "filename" in new_df.columns:
+        new_df['Duplicate Status'] = new_df['filename'].apply(
+            lambda x: 'Duplicate' if x in existing_filenames else 'New'
+        )
+    else:
+        raise ValueError("Missing 'filename' or 'GitHub Repo Name' in input data.")
+
     return new_df.to_dict(orient='records')
 
 def insert_new_records(new_data):
     """
     Insert only new filenames into MongoDB.
     """
-    collection = get_db_collection()
     existing_filenames = fetch_existing_filenames()
-    new_records = [item for item in new_data if item['filename'] not in existing_filenames]
+    new_records = []
+
+    for item in new_data:
+        filename = item.get("GitHub Repo Name") or item.get("filename")
+        if filename and filename not in existing_filenames:
+            new_records.append({"filename": filename})
 
     if new_records:
         collection.insert_many(new_records)
@@ -57,9 +65,8 @@ def insert_new_records(new_data):
 
 def check_duplicate(data):
     """
-    Check if a document already exists.
+    Check if a document with exact data already exists.
     """
-    collection = get_db_collection()
     existing = collection.find_one(data)
     return existing is not None
 
@@ -67,7 +74,7 @@ def insert_document(data):
     """
     Insert a single document into MongoDB.
     """
-    collection = get_db_collection()
     result = collection.insert_one(data)
     return str(result.inserted_id)
+
 
