@@ -97,3 +97,14 @@ from db_utils import test_mongo_connection
 async def startup_event():
     test_mongo_connection()
 
+from db_utils import fetch_knowledge_objects  # Make sure this import is there
+
+@app.get("/get-knowledge-objects")
+def get_knowledge_objects():
+    try:
+        knowledge_objects = fetch_knowledge_objects()
+        return {"data": knowledge_objects}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
