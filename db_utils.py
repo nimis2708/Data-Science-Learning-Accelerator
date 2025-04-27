@@ -88,5 +88,13 @@ def test_mongo_connection():
     except Exception as e:
         print(f"Error connecting to MongoDB: {e}")
 
+def fetch_knowledge_objects():
+    """
+    Fetch all knowledge objects from MongoDB collection.
+    """
+    documents = collection.find({}, {"_id": 0})  # Fetch all fields except _id
+    return list(documents)
+
+
 
 
